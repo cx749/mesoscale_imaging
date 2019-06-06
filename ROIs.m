@@ -1,5 +1,5 @@
-%% create ROIs for major sensory and association regions 
-%%
+%% creates ROIs for major sensory and association regions 
+%% manually draw ROIs
 load('FOV.mat'); %load top image of average FOV
 
 I = frame;
