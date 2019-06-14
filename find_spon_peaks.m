@@ -1,6 +1,8 @@
-function [pks, locs]  = find_spon_peaks(X_dff,movement_log)
+function [pks, locs]  = find_spon_peaks(lpf,X_dff,movement_log)
 X_dff = high_filt(0.1,X_dff); % high pass filter at 0.1;
-[Xpks,Xlocs] = peak_find(1,X_dff,1,0);
+
+[Xpks,Xlocs] = peak_find(lpf,X_dff,1,0);
+
 
 k = 1;
  

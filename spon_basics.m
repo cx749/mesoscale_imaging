@@ -13,13 +13,13 @@ load('movement-log.mat')
     
 still = size(X_dff,1)-sum(movement_log);
 %% find peaks (size and location) during still periods of recording
-[Xpks, Xlocs]  = find_spon_peaks(X_dff,movement_log); %in L barrel ROI
-[Rpks, Rlocs]  = find_spon_peaks(R_dff,movement_log); %in R barrel ROI
-[VLpks, VLlocs]  = find_spon_peaks(VL_dff,movement_log); %in L visual ROI
-[VRpks, VRlocs]  = find_spon_peaks(VR_dff,movement_log); %in R visual ROI
-[RSLpks, RSLlocs]  = find_spon_peaks(RSL_dff,movement_log); %in L restrosplenial ROI
-[RSRpks, RSRlocs]  = find_spon_peaks(RSR_dff,movement_log); %in R restrosplenia ROI
-[Wpks, Wlocs]  = find_spon_peaks(W_dff,movement_log); %in whole brain ROI
+[Xpks, Xlocs]  = find_spon_peaks(1,X_dff,movement_log); %in L barrel ROI
+[Rpks, Rlocs]  = find_spon_peaks(1,R_dff,movement_log); %in R barrel ROI
+[VLpks, VLlocs]  = find_spon_peaks(1,VL_dff,movement_log); %in L visual ROI
+[VRpks, VRlocs]  = find_spon_peaks(1,VR_dff,movement_log); %in R visual ROI
+[RSLpks, RSLlocs]  = find_spon_peaks(1,RSL_dff,movement_log); %in L restrosplenial ROI
+[RSRpks, RSRlocs]  = find_spon_peaks(1,RSR_dff,movement_log); %in R restrosplenia ROI
+[Wpks, Wlocs]  = find_spon_peaks(1,W_dff,movement_log); %in whole brain ROI
 % adjust orientation of traces
 X_dff = X_dff';
 R_dff = R_dff';
@@ -29,12 +29,12 @@ RSL_dff = RSL_dff';
 RSR_dff = RSR_dff';
 W_dff = W_dff';
 %% find max and min dvdt of waveforms
-[Xmax_dvdt,Xmin_dvdt] = spon_rise_times(X_dff,Xpks,Xlocs); %L barrel ROI
-[Rmax_dvdt,Rmin_dvdt] = spon_rise_times(R_dff,Rpks,Rlocs); %R barrel ROI
-[VLmax_dvdt,VLmin_dvdt] = spon_rise_times(VL_dff,VLpks,VLlocs); %L visual ROI
-[VRmax_dvdt,VRmin_dvdt] = spon_rise_times(VR_dff,VRpks,VRlocs); %R visual ROI
-[RSLmax_dvdt,RSLmin_dvdt] = spon_rise_times(RSL_dff,RSLpks,RSLlocs); %R rs ROI
-[RSRmax_dvdt,RSRmin_dvdt] = spon_rise_times(RSR_dff,RSRpks,RSRlocs); %R rs ROI
+[Xmax_dvdt,Xmin_dvdt] = spon_rise_times(1,X_dff,Xpks,Xlocs); %L barrel ROI
+[Rmax_dvdt,Rmin_dvdt] = spon_rise_times(1,R_dff,Rpks,Rlocs); %R barrel ROI
+[VLmax_dvdt,VLmin_dvdt] = spon_rise_times(1,VL_dff,VLpks,VLlocs); %L visual ROI
+[VRmax_dvdt,VRmin_dvdt] = spon_rise_times(1,VR_dff,VRpks,VRlocs); %R visual ROI
+[RSLmax_dvdt,RSLmin_dvdt] = spon_rise_times(1,RSL_dff,RSLpks,RSLlocs); %R rs ROI
+[RSRmax_dvdt,RSRmin_dvdt] = spon_rise_times(1,RSR_dff,RSRpks,RSRlocs); %R rs ROI
 
 
 % adjust orientation of traces

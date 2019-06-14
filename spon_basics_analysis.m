@@ -6,7 +6,7 @@ data_base = developmentalrecordings; %whiskertrimmedrecordings; %
 ind=find(ismember(data_base(:,3),'whisk sing')); %find location of whisk sing files in file record matrix
 
 
-for i = 37:(size(ind,1)+1) %P3 starts at 19
+for i = 2:(size(ind,1)+1) %P3 starts at 19 for 'whisk sing'
     
 cd (char(data_base(2,1))); %go to main root directory
 cd(char(data_base((ind(i-1,1)),2))); %go to current file directory

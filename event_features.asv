@@ -1,9 +1,6 @@
 %% *****load file location csv file as string array *****
-
-%% **** change name to data base
-data_base = developmentalrecordings; %whiskertrimmedrecordings; %
-%% find folder and load TIFF files
-ind=find(ismember(data_base(:,3),'whisk sing')); %find location of whisk sing files in file record matrix
+%%
+data_base = developmentalrecordings;
 
 
 LB_one_rise = zeros(1,1);
@@ -13,13 +10,19 @@ LB_five_rise = zeros(1,1);
 LB_seven_rise = zeros(1,1);
 LB_nine_rise = zeros(1,1);
 
-for i = 2:(size(ind,1)+1) %P3 starts at 19 for 'whisk sing'
+i = 2; %start searching database at row 2 (titles in row 1)
+finished = 0; %finished is a boolean output of folder_find to determine when all required files have been analysed 
+
+while finished == 0
     
-cd (char(data_base(2,1))); %go to main root directory
-cd(char(data_base((ind(i-1,1)),2))); %go to current file directory
-file = char(data_base((ind(i-1,1)),2));
-age = str2num(file(2));
-ID = str2num(file(end));
+[finished,file,age,ID] = folder_find('spon', data_base, i);
+i = i+1; 
+
+%  need to go up to animal root folder and then back down
+% load ('FOV');
+% load ('barrel ROI');
+
+
 
 load('movement-log.mat')
 load('barrel trace.mat')
@@ -49,7 +52,7 @@ still = size(X_dff,1)-sum(movement_log);
 % [RSLmax_dvdt,RSLmin_dvdt] = spon_rise_times(7,RSL_dff,RSLpks,RSLlocs); %R rs ROI
 % [RSRmax_dvdt,RSRmin_dvdt] = spon_rise_times(7,RSR_dff,RSRpks,RSRlocs); %R rs ROI
 
-%%
+%
 if age == 1
    LB_one_rise = horzcat(LB_one_rise,Xmax_dvdt);
 else if age == 2
@@ -67,16 +70,33 @@ end
 end
         end
     end
+ 
 end
+
+
+   
+
 end
 
 %% cumulative frequency graphs for rise times
 
-figure;hold on;
+% figure;hold on;
 % cdfplot(LB_one_rise);
 % cdfplot(LB_two_rise);
-cdfplot(LB_three_rise);
-cdfplot(LB_five_rise);
-cdfplot(LB_seven_rise);
-cdfplot(LB_nine_rise);
-legend('P1','P2','P3','P5','P7','P9');
+% cdfplot(LB_three_rise);
+% cdfplot(LB_five_rise);
+% cdfplot(LB_seven_rise);
+% cdfplot(LB_nine_rise);
+% legend('P1','P2','P3','P5','P7','P9');
+
+% %% create ROI surrounding sensory ROI
+% figure;imshow(frame);
+% outline = cell2mat(bwboundaries(threshIdx));
+% hold on
+% plot(outline(:, 2), outline(:, 1), 'w', 'linewidth', 1);
+% 
+% outer = roipoly;
+% adj_roi = outer - threshIdx;
+% 
+% %timeseries from surround ROI
+% [Xadj_dff] = roi_timeseries(adj_roi,I);
