@@ -1,22 +1,40 @@
 %% *****load file location csv file as string array *****
-%%
+%% rename imported string array to standardised variable
+exist developmentalrecordings;
+if ans == 1 
 data_base = developmentalrecordings;
+treatment_type = 0;
+end
+exist whiskertrimmedrecordings;
+if ans == 1
+data_base = whiskertrimmedrecordings;
+treatment_type = 1;
+treatment_list = zeros(1,1);
+end
 
 
-LB_one_rise = zeros(1,1);
-LB_two_rise = zeros(1,1);
-LB_three_rise = zeros(1,1);
-LB_five_rise = zeros(1,1);
-LB_seven_rise = zeros(1,1);
-LB_nine_rise = zeros(1,1);
+%% create blank marticies for rise-time outputs
+LB_one_rise = zeros(1,1);LB_one_fall = zeros(1,1);
+LB_two_rise = zeros(1,1);LB_two_fall = zeros(1,1);
+LB_three_rise = zeros(1,1);LB_three_fall = zeros(1,1);
+LB_five_rise = zeros(1,1);LB_five_fall = zeros(1,1);
+LB_seven_rise = zeros(1,1);LB_seven_fall = zeros(1,1);
+LB_nine_rise = zeros(1,1);LB_nine_fall = zeros(1,1);
 
+
+%% set initial conditions 
 i = 2; %start searching database at row 2 (titles in row 1)
 finished = 0; %finished is a boolean output of folder_find to determine when all required files have been analysed 
 
+%% cycle through folders and extract spontaneous even feature results 
 while finished == 0
-    
+if treatment_type == 0    %for original developmental recordings
 [finished,file,age,ID] = folder_find('spon', data_base, i);
-i = i+1; 
+else if treatment_type ==1      %for trimmed cohort
+        [finished,file,age,ID,treatment] = folder_find('spon', data_base, i,'t');
+    end
+end
+ 
 
 %  need to go up to animal root folder and then back down
 % load ('FOV');
@@ -25,7 +43,7 @@ i = i+1;
 
 
 load('movement-log.mat')
-load('barrel trace.mat')
+load('barrel ROI trace.mat')
 % load('right barrel trace.mat')
 % load('VL trace.mat')
 % load('VR trace.mat')
@@ -45,7 +63,7 @@ still = size(X_dff,1)-sum(movement_log);
 % [Wpks, Wlocs]  = find_spon_peaks(7,W_dff,movement_log); %in whole brain ROI
 
 %% find max and min dvdt of waveforms
-[Xmax_dvdt,Xmin_dvdt,Xmax_dvdt_ave,Xmin_dvdt_ave] = spon_rise_times(7,X_dff,Xpks,Xlocs); %L barrel ROI
+[Xmax_dvdt,Xmin_dvdt,Xmax_dvdt_ave,Xmin_dvdt_ave,amp] = spon_rise_times(7,X_dff,Xpks,Xlocs); %L barrel ROI
 % [Rmax_dvdt,Rmin_dvdt, Rmax_dvdt_ave,Rmin_dvdt_ave] = spon_rise_times(7,R_dff,Rpks,Rlocs); %R barrel ROI
 % [VLmax_dvdt,VLmin_dvdt] = spon_rise_times(7,VL_dff,VLpks,VLlocs); %L visual ROI
 % [VRmax_dvdt,VRmin_dvdt] = spon_rise_times(7,VR_dff,VRpks,VRlocs); %R visual ROI
@@ -54,17 +72,86 @@ still = size(X_dff,1)-sum(movement_log);
 
 %
 if age == 1
-   LB_one_rise = horzcat(LB_one_rise,Xmax_dvdt);
+   LB_one_rise = horzcat(LB_one_rise,Xmax_dvdt./50);
+      LB_one_fall = horzcat(LB_one_fall,Xmin_dvdt./50);
 else if age == 2
-        LB_two_rise = horzcat(LB_two_rise,Xmax_dvdt);
+        LB_two_rise = horzcat(LB_two_rise,Xmax_dvdt./50);
+         LB_two_fall = horzcat(LB_two_fall,Xmin_dvdt./50);
     else if age == 3
-            LB_three_rise = horzcat(LB_three_rise,Xmax_dvdt);
+            LB_three_rise = horzcat(LB_three_rise,Xmax_dvdt./50);
+             LB_three_fall = horzcat(LB_three_fall,Xmin_dvdt./50);
         else if age == 5
-                LB_five_rise = horzcat(LB_five_rise,Xmax_dvdt);
+                LB_five_rise = horzcat(LB_five_rise,Xmax_dvdt./50);
+                 LB_five_fall = horzcat(LB_five_fall,Xmin_dvdt./50);
             else if age == 7
-                    LB_seven_rise = horzcat(LB_seven_rise,Xmax_dvdt);
+                    LB_seven_rise = horzcat(LB_seven_rise,Xmax_dvdt./50);
+                     LB_seven_fall = horzcat(LB_seven_fall,Xmin_dvdt./50);
                 else if age == 9
-                        LB_nine_rise = horzcat(LB_nine_rise,Xmax_dvdt);
+                        LB_nine_rise = horzcat(LB_nine_rise,Xmax_dvdt./50);
+                         LB_nine_fall = horzcat(LB_nine_fall,Xmin_dvdt./50);
+end
+end
+        end
+    end
+ 
+end
+end
+treatment_full = repelem(treatment,size(Xmax_dvdt,2));
+treatment_list = horzcat(treatment_list,treatment_full);
+   
+i = i+1;
+
+end
+
+%% kinetics of whisker stimulated events
+i = 2; %start searching database at row 2 (titles in row 1)
+finished = 0; %finished is a boolean output of folder_find to determine when all required files have been analysed 
+% create blank marticies for rise-time outputs
+stim_one_rise = zeros(1,1);stim_one_fall = zeros(1,1);
+stim_two_rise = zeros(1,1);stim_two_fall = zeros(1,1);
+stim_three_rise = zeros(1,1);stim_three_fall = zeros(1,1);
+stim_five_rise = zeros(1,1);stim_five_fall = zeros(1,1);
+stim_seven_rise = zeros(1,1);stim_seven_fall = zeros(1,1);
+stim_nine_rise = zeros(1,1);stim_nine_fall = zeros(1,1);
+
+while finished == 0
+
+    if treatment_type == 0    %for original developmental recordings
+[finished,file,age,ID] = folder_find('whisk sing', data_base, i);
+else if treatment_type ==1      %for trimmed cohort
+        [finished,file,age,ID,treatment] = folder_find('whisk sing', data_base, i,'t');
+    end
+end
+
+load('individual respose traces.mat')
+
+for p = 1:size(f,2)
+f(:,p) = low_filt(7,f(:,p)); %lowpass filter to remove heartbeat ossilations 
+ rise(:,p) = diff(f(:,p));
+    rise(:,p) = smooth((rise(:,p)/0.2),5);
+   
+    max_dvdt_stim(:,p) = max(rise(1:50,p)); %max rise time in first second of waveform (rising period)
+    min_dvdt_stim(:,p) = min(rise(51:100,p)); %max fall time in second second of waveform (falling period)
+
+end
+if age == 1
+   stim_one_rise = horzcat(stim_one_rise, max_dvdt_stim./50);
+   stim_one_fall = horzcat(stim_one_fall, min_dvdt_stim./50);
+else if age == 2
+        stim_two_rise = horzcat(stim_two_rise, max_dvdt_stim./50);
+        stim_two_fall = horzcat(stim_two_fall, min_dvdt_stim./50);
+    else if age == 3
+            stim_three_rise = horzcat(stim_three_rise, max_dvdt_stim./50);
+            stim_three_fall = horzcat(stim_three_fall, min_dvdt_stim./50);
+        else if age == 5
+                stim_five_rise = horzcat(stim_five_rise, max_dvdt_stim./50);
+                stim_five_fall = horzcat(stim_five_fall, min_dvdt_stim./50);
+            else if age == 7
+                    stim_seven_rise = horzcat(stim_seven_rise, max_dvdt_stim./50);
+                    stim_seven_fall = horzcat(stim_seven_fall, min_dvdt_stim./50);
+                else if age == 9
+                        stim_nine_rise = horzcat(stim_nine_rise, max_dvdt_stim./50);
+                        stim_nine_fall = horzcat(stim_nine_fall, min_dvdt_stim./50);
 end
 end
 end
@@ -72,24 +159,60 @@ end
     end
  
 end
+i = i+1;
+end
+% %% cumulative frequency graphs for rise times stim vs spon
+% if treatment_type == 0    %for original developmental recordings
+% figure;
+% subplot(2,3,1);hold on;cdfplot(LB_one_rise);cdfplot(stim_one_rise);title('P1');xlabel('df/f% per second');ylabel('cum freq');
+% subplot(2,3,2);hold on;cdfplot(LB_two_rise);cdfplot(stim_two_rise);title('P2');xlabel('df/f% per second');ylabel('cum freq');
+% subplot(2,3,3);hold on;cdfplot(LB_three_rise);cdfplot(stim_three_rise);title('P3');xlabel('df/f% per second');ylabel('cum freq');
+% subplot(2,3,4);hold on;cdfplot(LB_five_rise);cdfplot(stim_five_rise);title('P5');xlabel('df/f% per second');ylabel('cum freq');
+% subplot(2,3,5);hold on;cdfplot(LB_seven_rise);cdfplot(stim_seven_rise);title('P7');xlabel('df/f% per second');ylabel('cum freq');
+% subplot(2,3,6);hold on;cdfplot(LB_nine_rise);cdfplot(stim_nine_rise);title('P9');xlabel('df/f% per second');ylabel('cum freq');
+% legend('spon', 'stim','location','southeast');legend('boxoff'); suptitle('Max-dvdt');
+% 
+% figure;hold on;cdfplot(LB_one_rise);cdfplot(LB_two_rise);cdfplot(LB_three_rise);
+% cdfplot(LB_five_rise);cdfplot(LB_seven_rise);cdfplot(LB_nine_rise);legend('P1', 'P2','P3','P5','P7','P9');title('Spontaneous event rise times');xlabel('df/f% per second');ylabel('cum freq');
+% 
+% figure;hold on;cdfplot(stim_one_rise);cdfplot(stim_two_rise);
+% cdfplot(stim_three_rise);cdfplot(stim_five_rise);cdfplot(stim_seven_rise);cdfplot(stim_nine_rise);legend('P1', 'P2','P3','P5','P7','P9');title('Stimulated event rise times');xlabel('df/f% per second');ylabel('cum freq');
+% 
+% figure; 
+% subplot(2,3,1);hold on;scatter(LB_one_fall,LB_one_rise);lsline;scatter(stim_one_fall,stim_one_rise);lsline;title('P1');xlabel('falling (df/f% per second)');ylabel('rising (df/f% per second)');
+% subplot(2,3,2); hold on;scatter(LB_two_fall,LB_two_rise);lsline;scatter(stim_two_fall,stim_two_rise);lsline;title('P2');xlabel('falling (df/f% per second)');ylabel('rising (df/f% per second)');
+% subplot(2,3,3); hold on;scatter(LB_three_fall,LB_three_rise);lsline;scatter(stim_three_fall,stim_three_rise);lsline;title('P3');xlabel('falling (df/f% per second)');ylabel('rising (df/f% per second)');
+% subplot(2,3,4);hold on;scatter(LB_five_fall,LB_five_rise);lsline;scatter(stim_five_fall,stim_five_rise);lsline;title('P5');xlabel('falling (df/f% per second)');ylabel('rising (df/f% per second)');
+% subplot(2,3,5); hold on;scatter(LB_seven_fall,LB_seven_rise);lsline;scatter(stim_seven_fall,stim_seven_rise);lsline;title('P7');xlabel('falling (df/f% per second)');ylabel('rising (df/f% per second)');
+% subplot(2,3,6); hold on;scatter(LB_nine_fall,LB_nine_rise);lsline;scatter(stim_nine_fall,stim_nine_rise);lsline;title('P9');xlabel('falling (df/f% per second)');ylabel('rising (df/f% per second)');
+% suptitle('Max-dvdt:Min-dvdt correlation');%legend('spon', 'spon ls', 'stim', 'stim ls','location','southwest');legend('boxoff');
 
+%% consolidate all spontaneous results into a single 'master' matrix to run cluster analysis 
+if treatment_type == 0    %for original developmental recordings
 
-   
+%first column is age of animal the event is from
+age = ones(size(LB_one_fall(:,2:end), 2),1)*1;features = vertcat(age, ones(size(LB_two_fall(:,2:end), 2),1)*2,ones(size(LB_three_fall(:,2:end), 2),1)*3,ones(size(LB_five_fall(:,2:end), 2),1)*5,ones(size(LB_seven_fall(:,2:end), 2),1)*7,ones(size(LB_nine_fall(:,2:end), 2),1)*9);
 
+%add max_dvdt to column 1
+features(:,2) = vertcat(LB_one_rise(:,2:end)',LB_two_rise(:,2:end)',LB_three_rise(:,2:end)',LB_five_rise(:,2:end)',LB_seven_rise(:,2:end)',LB_nine_rise(:,2:end)');
+%add min_dvdt to column 2
+features(:,3) = vertcat(LB_one_fall(:,2:end)',LB_two_fall(:,2:end)',LB_three_fall(:,2:end)',LB_five_fall(:,2:end)',LB_seven_fall(:,2:end)',LB_nine_fall(:,2:end)');
+
+else if treatment_type == 1    %for whisker trimmed cohort
+    %first column is age of animal the event is from
+age = ones(size(LB_three_fall(:,2:end), 2),1)*3;features = vertcat(age, ones(size(LB_seven_fall(:,2:end), 2),1)*7);
+features(:,2) = cell(treatment_list(:,2:end));
+end
 end
 
-%% cumulative frequency graphs for rise times
+%% k-mean cluster analysis
 
-% figure;hold on;
-% cdfplot(LB_one_rise);
-% cdfplot(LB_two_rise);
-% cdfplot(LB_three_rise);
-% cdfplot(LB_five_rise);
-% cdfplot(LB_seven_rise);
-% cdfplot(LB_nine_rise);
-% legend('P1','P2','P3','P5','P7','P9');
+% [idx,C] = kmeans(features,3);
+%  
+% figure;plot(features(idx==1,1),features(idx==1,2),'r.','MarkerSize',12);hold on;plot(features(idx==2,1),features(idx==2,2),'b.','MarkerSize',12);plot(features(idx==3,1),features(idx==3,2),'g.','MarkerSize',12);plot(C(:,1),C(:,2),C(:,3),'kx');
+% 
 
-% %% create ROI surrounding sensory ROI
+%% create ROI surrounding sensory ROI
 % figure;imshow(frame);
 % outline = cell2mat(bwboundaries(threshIdx));
 % hold on
