@@ -11,9 +11,10 @@ for i = 1:size(f,2)
     rise(:,i) = smooth((rise(:,i)/0.2),5);
     
     
-B0 = mean(f(30:40,i));
-M = max(f(40:60,i));
-amp(:,i) = M-B0;
+%B0 = mean(f(35:40,i)); %baseline is the average of the 15 frames preceeding the peak
+B0 = min(f(35:40,i)); %baseline is the minimum point in the 15 frames preceeding the peak
+M = max(f(40:60,i)); %peak is the max between frams 40 and 60 of waveform extraction (which is
+amp(:,i) = M-B0; %amplitude of event is baseline subtracted
 
 end
 
