@@ -43,7 +43,7 @@ end
 
 
 load('movement-log.mat')
-load('barrel trace.mat')
+load('barrel ROI trace.mat')
 % load('right barrel trace.mat')
 % load('VL trace.mat')
 % load('VR trace.mat')
@@ -54,7 +54,7 @@ load('barrel trace.mat')
 still = size(X_dff,1)-sum(movement_log);
 %% find peaks (size and location) during still periods of recording
 [Xpks, Xlocs]  = find_spon_peaks(7,X_dff,movement_log); %in L barrel ROI
-% [Rpks, Rlocs]  = find_spon_peaks(7,R_dff,movement_log); %in R barrel ROI
+%[Rpks, Rlocs]  = find_spon_peaks(7,R_dff,movement_log); %in R barrel ROI
 % [VLpks, VLlocs]  = find_spon_peaks(7,VL_dff,movement_log); %in L visual ROI
 % [VRpks, VRlocs]  = find_spon_peaks(7,VR_dff,movement_log); %in R visual ROI
 % [RSLpks, RSLlocs]  = find_spon_peaks(7,RSL_dff,movement_log); %in L restrosplenial ROI
@@ -252,6 +252,7 @@ age = ones(size(LB_three_fall(:,2:end), 2),1)*3;features = vertcat(age, ones(siz
 features(:,2) = treatment_list(:,2:end);
 features(:,3) = vertcat(LB_three_rise(:,2:end)',LB_seven_rise(:,2:end)');
 features(:,4) = vertcat(LB_three_fall(:,2:end)',LB_seven_fall(:,2:end)');
+features(:,5) = vertcat(LB_three_amp(:,2:end)',LB_seven_amp(:,2:end)');
 
 for i = 1:size(features,1)
     if features(i,1) == 3 && features(i,2) == 0
@@ -279,6 +280,9 @@ subplot(1,2,2);hold on;cdfplot(N7(:,3));cdfplot(T7(:,3));title('P7 spontaneous m
 figure;
 subplot(1,2,1);hold on;cdfplot(N3(:,4));cdfplot(T3(:,4)); title('P3 spontaneous min-dvdt');xlabel('df/f% per second');ylabel('cum freq');legend('Not', 'Trimmed','location','northwest');
 subplot(1,2,2);hold on;cdfplot(N7(:,4));cdfplot(T7(:,4));title('P7 spontaneous min-dvdt');xlabel('df/f% per second');ylabel('cum freq');legend('Not', 'Trimmed','location','northwest');
+figure;
+subplot(1,2,1);hold on;cdfplot(N3(:,5));cdfplot(T3(:,5)); title('P3 spontaneous amp');xlabel('df/f%');ylabel('cum freq');legend('Not', 'Trimmed','location','southeast');
+subplot(1,2,2);hold on;cdfplot(N7(:,5));cdfplot(T7(:,5));title('P7 spontaneous amp');xlabel('df/f%');ylabel('cum freq');legend('Not', 'Trimmed','location','southeast');
 
 end
 end
@@ -291,7 +295,7 @@ end
 % 
 % [h, p]= ttest2(N3(:,3),T3(:,3));
 %% k-mean cluster analysis
-clust = 10; %number of clusters
+clust = 20; %number of clusters
 
 %check for number of clusters using sum of squares to assess elbow
 for c = 1:clust
@@ -300,22 +304,26 @@ for c = 1:clust
 end
 figure;plot(totSum);
 
+%% visualise best cluster size
+clust_best = inputdlg('Optimum cluster number'); %best number of clusters
+clust_best = str2num(clust_best{1});
 
-%run kmeans cluster
-[idx,C,sumd] = kmeans(features(:,2:4),clust);
-
-%visualise
+[idx,C,sumd] = kmeans(features(:,2:4),clust_best); %k
 figure;
 subplot(3,1,1);hold on;
-for c = 1:clust;
+for c = 1:clust_best;
 plot(features(idx==c,1),features(idx==c,2),'o');
 end
 ylabel('max-dvdt');xlabel('age');
-% plot(features(idx==2,1),features(idx==2,2),'b.','MarkerSize',12);
-% plot(features(idx==3,1),features(idx==3,2),'g.','MarkerSize',12);plot(C(:,1),C(:,2),C(:,3),'kx');
-% 
+
 subplot(3,1,2);gscatter(features(:,2),features(:,3),idx);xlabel('max-dvdt');ylabel('min-dvdt');
 subplot(3,1,3);gscatter(features(:,2),features(:,4),idx);xlabel('max-dvdt');ylabel('amp');
+
+%how many events in each cluster pre and post lidocaine
+freq(1,1) = sum(idx == 1);
+freq(1,2) = sum(idx == 2)./2;
+freq(1,3) = sum(idx == 3)./3;
+
 
 %% create ROI surrounding sensory ROI
 % figure;imshow(frame);

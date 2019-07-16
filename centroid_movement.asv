@@ -13,9 +13,9 @@ load('barrel trace');
 
 outline = cell2mat(bwboundaries(threshIdx));%create outline of barrel ROI
 
-%X = low_filt(7,X_dff); %filter trace with a lowpass filter
+X = low_filt(7,X_dff); %filter trace with a lowpass filter
 
-[pks,locs]  = find_spon_peaks(7,X_dff,movement_log,0); %detect events during still periods - NB 1 at end means graph of locations produced
+[pks,locs]  = find_spon_peaks(7,X_dff,movement_log,1); %detect events during still periods - NB 1 at end means graph of locations produced
 
 %% get surround timeseries 
 
@@ -35,16 +35,13 @@ for i = 1:size(locs,1) %for all events detected
 
 %plot image of heatmap for event peak, with location of max pixel and the & barrel ROI boundary
 figure;imagesc(peak);hold on;scatter(pkIdx(:,2),pkIdx(:,1),'k');plot(outline(:, 2), outline(:, 1), 'w', 'linewidth', 1);set(gca,'XTick',[], 'YTick', []);
-    end
-end
 
-%%
+
 f = 1; 
 clear event_series
 for k = pre:post %find a baseline correct image for each frame for the period before and after the event
    
-    %peak = (((double(I(:,:,(locs(i,:)+(k)))) - mean_lows)./mean_lows)*100.*L); 
-    peak = (((double(I(:,:,(locs(i,:)+(k)))))));
+    peak = (((double(I(:,:,(locs(i,:)+(k)))) - mean_lows)./mean_lows)*100.*L); 
  peak_ROI = peak.*threshIdx;
 [pkResp, pkIdx] = max2(peak_ROI);  %peak response pixel
 
@@ -57,10 +54,12 @@ f = f+1;
 % amp(k+21,:) = pkResp;
 
 end
+    end
+end
 
 %% save example event tiff stack  
 event_series = single(event_series);
-saveastiff(event_series, 'example_match.tif');
+saveastiff(event_series, 'example_event_weak.tif');
 
 
 

@@ -1,0 +1,30 @@
+%baseline correct & temporally filer 0.1-1Hz whole tiff stack
+high = 0.1;
+low = 7;
+load('mean_lows');
+
+I = double(I);
+
+%baseline correct and temporally filter tiff stack 
+for i = 1:size(I,1)
+    for j = 1:size(I,2)
+I(i,j,:) = (I(i,j,:) - mean_lows(i,j))./mean_lows(i,j)*100;
+I(i,j,:) = low_filt(low,I(i,j,:));
+I(i,j,:) = high_filt(high,I(i,j,:));
+    end
+end
+
+% 
+% ma = max(I);ma = max(ma);ma = max(ma);
+% mi = min(I);mi = min(mi);mi = min(mi);
+% clims = [mi ma];
+
+%create 
+% video = VideoWriter('yourvideo.avi'); %create the video object
+% open(video); %open the file for writing
+% for f=1:size(I,3) %where N is the number of images
+%      figure('visible','off');imagesc(I(:,:,f),clims);
+%      F = getframe;
+%   writeVideo(video,F); %write the image to file
+% end
+% close(video); %close the file

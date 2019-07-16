@@ -1,0 +1,23 @@
+function [matches] = motif_correlation(I,barrel_map)
+
+for i = 1:size(I,3)
+    frame = I(:,:,i);
+    correl = corrcoef(barrel_map,frame);
+    matches(1,i) = correl(2,1);
+   
+end
+% figure;imagesc(matches);colormap(jet);colorbar;
+
+
+thresh = max(matches).*0.7;
+high_matches = matches-thresh;
+
+high_matches(high_matches<0) = 0;
+
+[pks,locs] = findpeaks(high_matches); 
+
+for j = 1:size(locs,2)
+   motifs(:,:,j) = I(:,:,locs()
+end
+
+end
